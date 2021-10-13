@@ -9,18 +9,11 @@ declare(strict_types=1);
 namespace Magento\Captcha\CustomerData;
 
 use Magento\Customer\CustomerData\SectionSourceInterface;
-use Magento\Customer\Model\Session as CustomerSession;
-use Magento\Captcha\Model\DefaultModel;
-use Magento\Captcha\Helper\Data as CaptchaHelper;
-use Magento\Framework\App\ObjectManager;
-use Magento\Framework\DataObject;
 
 /**
- * Captcha section.
- *
- * @SuppressWarnings(PHPMD.CookieAndSessionMisuse)
+ * Captcha section
  */
-class Captcha extends DataObject implements SectionSourceInterface
+class Captcha extends \Magento\Framework\DataObject implements SectionSourceInterface
 {
     /**
      * @var array
@@ -28,31 +21,24 @@ class Captcha extends DataObject implements SectionSourceInterface
     private $formIds;
 
     /**
-     * @var CaptchaHelper
+     * @var \Magento\Captcha\Helper\Data
      */
     private $helper;
 
     /**
-     * @var CustomerSession
-     */
-    private $customerSession;
-
-    /**
-     * @param CaptchaHelper $helper
+     * @param \Magento\Captcha\Helper\Data $helper
      * @param array $formIds
      * @param array $data
-     * @param CustomerSession|null $customerSession
+     * @codeCoverageIgnore
      */
     public function __construct(
-        CaptchaHelper $helper,
+        \Magento\Captcha\Helper\Data $helper,
         array $formIds,
-        array $data = [],
-        ?CustomerSession $customerSession = null
+        array $data = []
     ) {
+        parent::__construct($data);
         $this->helper = $helper;
         $this->formIds = $formIds;
-        parent::__construct($data);
-        $this->customerSession = $customerSession ?? ObjectManager::getInstance()->get(CustomerSession::class);
     }
 
     /**
@@ -63,15 +49,9 @@ class Captcha extends DataObject implements SectionSourceInterface
         $data = [];
 
         foreach ($this->formIds as $formId) {
-            /** @var DefaultModel $captchaModel */
             $captchaModel = $this->helper->getCaptcha($formId);
-            $login = '';
-            if ($this->customerSession->isLoggedIn()) {
-                $login = $this->customerSession->getCustomerData()->getEmail();
-            }
-            $required =  $captchaModel->isRequired($login);
             $data[$formId] = [
-                'isRequired' => $required,
+                'isRequired' => $captchaModel->isRequired(),
                 'timestamp' => time()
             ];
         }
