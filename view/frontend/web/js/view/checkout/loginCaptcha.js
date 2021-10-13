@@ -6,10 +6,9 @@
 define([
     'Magento_Captcha/js/view/checkout/defaultCaptcha',
     'Magento_Captcha/js/model/captchaList',
-    'Magento_Customer/js/action/login',
-    'underscore'
+    'Magento_Customer/js/action/login'
 ],
-function (defaultCaptcha, captchaList, loginAction, _) {
+function (defaultCaptcha, captchaList, loginAction) {
     'use strict';
 
     return defaultCaptcha.extend({
@@ -27,10 +26,9 @@ function (defaultCaptcha, captchaList, loginAction, _) {
 
                 loginAction.registerLoginCallback(function (loginData) {
                     if (loginData['captcha_form_id'] &&
-                        loginData['captcha_form_id'] === self.formId &&
-                        self.isRequired()
+                        loginData['captcha_form_id'] == self.formId //eslint-disable-line eqeqeq
                     ) {
-                        _.defer(self.refresh.bind(self));
+                        self.refresh();
                     }
                 });
             }

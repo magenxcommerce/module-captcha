@@ -7,10 +7,8 @@ define([
     'jquery',
     'uiComponent',
     'Magento_Captcha/js/model/captcha',
-    'Magento_Captcha/js/model/captchaList',
-    'Magento_Customer/js/customer-data',
-    'underscore'
-], function ($, Component, Captcha, captchaList, customerData, _) {
+    'Magento_Captcha/js/model/captchaList'
+], function ($, Component, Captcha, captchaList) {
     'use strict';
 
     var captchaConfig;
@@ -36,47 +34,10 @@ define([
             if (window[this.configSource] && window[this.configSource].captcha) {
                 captchaConfig = window[this.configSource].captcha;
                 $.each(captchaConfig, function (formId, captchaData) {
-                    var captcha;
-
                     captchaData.formId = formId;
-                    captcha = Captcha(captchaData);
-                    this.checkCustomerData(formId, customerData.get('captcha')(), captcha);
-                    this.subscribeCustomerData(formId, captcha);
-                    captchaList.add(captcha);
-                }.bind(this));
+                    captchaList.add(Captcha(captchaData));
+                });
             }
-        },
-
-        /**
-         * Check customer data for captcha configuration.
-         *
-         * @param {String} formId
-         * @param {Object} captchaData
-         * @param {Object} captcha
-         */
-        checkCustomerData: function (formId, captchaData, captcha) {
-            if (!_.isEmpty(captchaData) &&
-                !_.isEmpty(captchaData)[formId] &&
-                captchaData[formId].timestamp > captcha.timestamp
-            ) {
-                if (!captcha.isRequired() && captchaData[formId].isRequired) {
-                    captcha.refresh();
-                }
-                captcha.isRequired(captchaData[formId].isRequired);
-                captcha.timestamp = captchaData[formId].timestamp;
-            }
-        },
-
-        /**
-         * Subscribe for customer data updates.
-         *
-         * @param {String} formId
-         * @param {Object} captcha
-         */
-        subscribeCustomerData: function (formId, captcha) {
-            customerData.get('captcha').subscribe(function (captchaData) {
-                this.checkCustomerData(formId, captchaData, captcha);
-            }.bind(this));
         },
 
         /**
@@ -126,15 +87,6 @@ define([
          */
         isRequired: function () {
             return this.currentCaptcha !== null ? this.currentCaptcha.getIsRequired() : false;
-        },
-
-        /**
-         * Set isRequired on current captcha model.
-         *
-         * @param {Boolean} flag
-         */
-        setIsRequired: function (flag) {
-            this.currentCaptcha.setIsRequired(flag);
         },
 
         /**
