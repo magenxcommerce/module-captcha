@@ -63,7 +63,7 @@ class AjaxLoginTest extends TestCase
     /**
      * @var array
      */
-    protected $formIds = ['user_login'];
+    protected $formIds;
 
     /**
      * @var AjaxLogin
@@ -97,6 +97,7 @@ class AjaxLoginTest extends TestCase
             ->method('getCaptcha')
             ->willReturn($this->captchaMock);
 
+        $this->formIds = ['user_login'];
         $this->serializerMock = $this->createMock(Json::class);
 
         $this->model = new AjaxLogin(
@@ -193,10 +194,7 @@ class AjaxLoginTest extends TestCase
 
         $this->captchaMock->expects($this->once())->method('isRequired')->with($username)
             ->willReturn(false);
-        $expectLogAttempt = $requestContent['captcha_form_id'] ?? false;
-        $this->captchaMock
-            ->expects($expectLogAttempt ? $this->once() : $this->never())
-            ->method('logAttempt')->with($username);
+        $this->captchaMock->expects($this->never())->method('logAttempt')->with($username);
         $this->captchaMock->expects($this->never())->method('isCorrect');
 
         $closure = function () {
